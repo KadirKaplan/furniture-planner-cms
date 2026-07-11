@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat /Users/kadir/repo/furniture-planner-api/src/middleware/auth.js 2>/dev/null | head -30; echo \"---\"; cat /Users/kadir/repo/furniture-planner-api/src/utils/apiResponse.js 2>/dev/null)",
+      "Read(//Users/kadir/repo/furniture-planner-api/src/middleware/**)",
+      "Read(//Users/kadir/repo/furniture-planner-api/src/utils/**)"
+    ]
+  }
+}
