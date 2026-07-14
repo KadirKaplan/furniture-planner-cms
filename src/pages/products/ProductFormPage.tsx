@@ -18,11 +18,14 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FileUploadField } from '@/components/common/FileUploadField';
 
 const productSchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
   description: z.string().optional(),
+  icon: z.string().min(1, 'İkon zorunludur'),
+  modelUrl: z.string().min(1, '3D model zorunludur'),
   category: z.string().min(1, 'Lütfen bir kategori seçin'),
   allowedMaterials: z.array(z.string()).min(1, 'En az bir materyal seçmelisiniz'),
   basePrice: z.coerce.number().min(0, 'Fiyat negatif olamaz'),
@@ -60,6 +63,7 @@ export const ProductFormPage = () => {
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     register,
@@ -74,6 +78,8 @@ export const ProductFormPage = () => {
       name: '',
       slug: '',
       description: '',
+      icon: '',
+      modelUrl: '',
       category: '',
       allowedMaterials: [],
       basePrice: 0,
@@ -90,6 +96,7 @@ export const ProductFormPage = () => {
   });
 
   const nameValue = watch('name');
+  const slugValue = watch('slug');
   const availableColors = watch('availableColors') ?? [];
   const allowedMaterials = watch('allowedMaterials') ?? [];
 
@@ -100,6 +107,8 @@ export const ProductFormPage = () => {
         name: product.name,
         slug: product.slug,
         description: product.description ?? '',
+        icon: product.icon ?? '',
+        modelUrl: product.modelUrl ?? '',
         // category may be a populated object or a plain ID string
         category: extractId(product.category as string | { id: string }),
         // allowedMaterials may be populated objects; extract IDs
@@ -234,6 +243,28 @@ export const ProductFormPage = () => {
                       id="description"
                       {...register('description')}
                       className="min-h-[120px]"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FileUploadField
+                      label="İkon"
+                      kind="icon"
+                      slug={slugValue}
+                      value={watch('icon')}
+                      onUploaded={(url) => setValue('icon', url, { shouldValidate: true })}
+                      onUploadingChange={setIsUploading}
+                      error={errors.icon?.message}
+                    />
+
+                    <FileUploadField
+                      label="3D Model"
+                      kind="model"
+                      slug={slugValue}
+                      value={watch('modelUrl')}
+                      onUploaded={(url) => setValue('modelUrl', url, { shouldValidate: true })}
+                      onUploadingChange={setIsUploading}
+                      error={errors.modelUrl?.message}
                     />
                   </div>
                 </CardContent>
@@ -646,10 +677,12 @@ export const ProductFormPage = () => {
             </Button>
             <Button
               type="submit"
-              disabled={createProduct.isPending || updateProduct.isPending}
+              disabled={createProduct.isPending || updateProduct.isPending || isUploading}
             >
               {createProduct.isPending || updateProduct.isPending
                 ? 'Kaydediliyor...'
+                : isUploading
+                ? 'Dosya yükleniyor...'
                 : 'Kaydet'}
             </Button>
           </div>

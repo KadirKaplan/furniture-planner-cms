@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { useModule, useCreateModule, useUpdateModule } from '@/hooks/use-modules';
 import { useLocation, useParams } from 'wouter';
@@ -12,11 +12,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft } from 'lucide-react';
+import { FileUploadField } from '@/components/common/FileUploadField';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const moduleSchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
   description: z.string().optional(),
+  icon: z.string().min(1, 'İkon zorunludur'),
+  modelUrl: z.string().min(1, '3D model zorunludur'),
+  type: z.enum(['generic', 'door']).default('generic'),
   priceModifier: z.coerce.number().min(0, 'Fiyat negatif olamaz'),
   isActive: z.boolean().default(true),
 });
@@ -32,6 +37,7 @@ export const ModuleFormPage = () => {
   const { data: module, isLoading } = useModule(isEdit ? id : null);
   const createModule = useCreateModule();
   const updateModule = useUpdateModule();
+  const [isUploading, setIsUploading] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
@@ -39,12 +45,16 @@ export const ModuleFormPage = () => {
       name: '',
       slug: '',
       description: '',
+      icon: '',
+      modelUrl: '',
+      type: 'generic',
       priceModifier: 0,
       isActive: true,
     }
   });
 
   const nameValue = watch('name');
+  const slugValue = watch('slug');
 
   useEffect(() => {
     if (module && isEdit) {
@@ -52,6 +62,9 @@ export const ModuleFormPage = () => {
         name: module.name,
         slug: module.slug,
         description: module.description || '',
+        icon: module.icon || '',
+        modelUrl: module.modelUrl || '',
+        type: module.type || 'generic',
         priceModifier: module.priceModifier,
         isActive: module.isActive,
       });
@@ -120,10 +133,59 @@ export const ModuleFormPage = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="description">Açıklama</Label>
-                <Textarea 
-                  id="description" 
-                  {...register('description')} 
+                <Textarea
+                  id="description"
+                  {...register('description')}
                   className="min-h-[100px]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type">Modül Tipi *</Label>
+                <Select
+                  onValueChange={(value) => setValue('type', value as 'generic' | 'door', { shouldValidate: true })}
+                  value={watch('type')}
+                >
+                  <SelectTrigger id="type">
+                    <SelectValue placeholder="Tip seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="generic">Genel Modül</SelectItem>
+                    <SelectItem value="door">Kapı</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Kapı seçilirse 3D model furniture-bucket/models/doors/ altına yüklenir.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Medya</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FileUploadField
+                  label="İkon"
+                  kind="icon"
+                  slug={slugValue}
+                  value={watch('icon')}
+                  onUploaded={(url) => setValue('icon', url, { shouldValidate: true })}
+                  onUploadingChange={setIsUploading}
+                  error={errors.icon?.message}
+                />
+
+                <FileUploadField
+                  label="3D Model"
+                  kind="model"
+                  slug={slugValue}
+                  value={watch('modelUrl')}
+                  moduleType={watch('type')}
+                  onUploaded={(url) => setValue('modelUrl', url, { shouldValidate: true })}
+                  onUploadingChange={setIsUploading}
+                  error={errors.modelUrl?.message}
                 />
               </div>
             </CardContent>
@@ -157,8 +219,8 @@ export const ModuleFormPage = () => {
             <Button type="button" variant="outline" onClick={() => setLocation('/modules')}>
               İptal
             </Button>
-            <Button type="submit" disabled={createModule.isPending || updateModule.isPending}>
-              {createModule.isPending || updateModule.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+            <Button type="submit" disabled={createModule.isPending || updateModule.isPending || isUploading}>
+              {createModule.isPending || updateModule.isPending ? 'Kaydediliyor...' : isUploading ? 'Dosya yükleniyor...' : 'Kaydet'}
             </Button>
           </div>
         </form>

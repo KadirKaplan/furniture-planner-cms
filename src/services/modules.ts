@@ -1,10 +1,15 @@
 import { api } from './api';
 
+export type ModuleType = 'generic' | 'door';
+
 export interface Module {
   id: string;
   name: string;
   slug: string;
   description?: string;
+  icon: string;
+  modelUrl: string;
+  type: ModuleType;
   priceModifier: number;
   isActive: boolean;
 }

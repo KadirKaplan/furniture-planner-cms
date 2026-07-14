@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { useCategory, useCreateCategory, useUpdateCategory } from '@/hooks/use-categories';
 import { useLocation, useParams } from 'wouter';
@@ -12,12 +12,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft } from 'lucide-react';
+import { FileUploadField } from '@/components/common/FileUploadField';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string().min(1, 'İkon zorunludur'),
+  modelUrl: z.string().min(1, '3D model zorunludur'),
   order: z.coerce.number().int().min(0),
   isActive: z.boolean().default(true),
 });
@@ -33,6 +35,7 @@ export const CategoryFormPage = () => {
   const { data: category, isLoading } = useCategory(isEdit ? id : null);
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
+  const [isUploading, setIsUploading] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<CategoryForm>({
     resolver: zodResolver(categorySchema),
@@ -41,12 +44,14 @@ export const CategoryFormPage = () => {
       slug: '',
       description: '',
       icon: '',
+      modelUrl: '',
       order: 0,
       isActive: true,
     }
   });
 
   const nameValue = watch('name');
+  const slugValue = watch('slug');
 
   useEffect(() => {
     if (category && isEdit) {
@@ -55,6 +60,7 @@ export const CategoryFormPage = () => {
         slug: category.slug,
         description: category.description || '',
         icon: category.icon || '',
+        modelUrl: category.modelUrl || '',
         order: category.order,
         isActive: category.isActive,
       });
@@ -128,15 +134,30 @@ export const CategoryFormPage = () => {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="icon">İkon Sınıfı (İsteğe bağlı)</Label>
-                  <Input id="icon" {...register('icon')} placeholder="örn: lucide-tag" />
-                </div>
+                <FileUploadField
+                  label="İkon"
+                  kind="icon"
+                  slug={slugValue}
+                  value={watch('icon')}
+                  onUploaded={(url) => setValue('icon', url, { shouldValidate: true })}
+                  onUploadingChange={setIsUploading}
+                  error={errors.icon?.message}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="order">Sıralama</Label>
-                  <Input id="order" type="number" {...register('order')} />
-                </div>
+                <FileUploadField
+                  label="3D Model"
+                  kind="model"
+                  slug={slugValue}
+                  value={watch('modelUrl')}
+                  onUploaded={(url) => setValue('modelUrl', url, { shouldValidate: true })}
+                  onUploadingChange={setIsUploading}
+                  error={errors.modelUrl?.message}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="order">Sıralama</Label>
+                <Input id="order" type="number" {...register('order')} />
               </div>
 
               <div className="flex items-center space-x-2 pt-2">
@@ -154,8 +175,8 @@ export const CategoryFormPage = () => {
                 <Button type="button" variant="outline" onClick={() => setLocation('/categories')}>
                   İptal
                 </Button>
-                <Button type="submit" disabled={createCategory.isPending || updateCategory.isPending}>
-                  {createCategory.isPending || updateCategory.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+                <Button type="submit" disabled={createCategory.isPending || updateCategory.isPending || isUploading}>
+                  {createCategory.isPending || updateCategory.isPending ? 'Kaydediliyor...' : isUploading ? 'Dosya yükleniyor...' : 'Kaydet'}
                 </Button>
               </div>
             </form>
