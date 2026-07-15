@@ -15,6 +15,7 @@ interface FileUploadFieldProps {
   onUploadingChange?: (uploading: boolean) => void;
   error?: string;
   moduleType?: ModuleAssetType;
+  required?: boolean;
 }
 
 const ICON_MAX_BYTES = 800 * 1024;
@@ -30,6 +31,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   onUploadingChange,
   error,
   moduleType = 'generic',
+  required = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -104,7 +106,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
 
   return (
     <div className="space-y-2">
-      <Label>{label} *</Label>
+      <Label>{label}{required && ' *'}</Label>
       <div
         onClick={() => !uploading && inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}

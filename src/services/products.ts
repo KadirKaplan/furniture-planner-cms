@@ -5,8 +5,8 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
-  icon: string;
-  modelUrl: string;
+  icon?: string;
+  modelUrl?: string;
   category: { id: string; name: string; slug: string } | string;
   allowedMaterials: (string | { id: string; name: string; slug?: string })[];
   basePrice: number;
