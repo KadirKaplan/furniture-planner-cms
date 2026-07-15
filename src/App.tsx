@@ -17,6 +17,8 @@ import { ModulesPage } from '@/pages/modules/ModulesPage';
 import { ModuleFormPage } from '@/pages/modules/ModuleFormPage';
 import { ProductsPage } from '@/pages/products/ProductsPage';
 import { ProductFormPage } from '@/pages/products/ProductFormPage';
+import { UsersPage } from '@/pages/users/UsersPage';
+import { UserFormPage } from '@/pages/users/UserFormPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +80,16 @@ function Router() {
       </Route>
       <Route path="/products/:id/edit">
         <ProtectedRoute component={ProductFormPage} />
+      </Route>
+
+      <Route path="/users">
+        <ProtectedRoute component={UsersPage} />
+      </Route>
+      <Route path="/users/new">
+        <ProtectedRoute component={UserFormPage} />
+      </Route>
+      <Route path="/users/:id/edit">
+        <ProtectedRoute component={UserFormPage} />
       </Route>
 
       <Route component={NotFound} />

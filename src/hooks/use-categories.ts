@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../services/categories';
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
+import { getApiErrorMessage } from '@/lib/utils';
 
 export const useCategories = () => {
   return useQuery({
@@ -29,8 +30,8 @@ export const useCreateCategory = () => {
       toast.success('Başarıyla oluşturuldu');
       setLocation('/categories');
     },
-    onError: () => {
-      toast.error('Oluşturulurken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Oluşturulurken bir hata oluştu'));
     },
   });
 };
@@ -46,8 +47,8 @@ export const useUpdateCategory = () => {
       toast.success('Başarıyla güncellendi');
       setLocation('/categories');
     },
-    onError: () => {
-      toast.error('Güncellenirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Güncellenirken bir hata oluştu'));
     },
   });
 };
@@ -61,8 +62,8 @@ export const useDeleteCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Başarıyla silindi');
     },
-    onError: () => {
-      toast.error('Silinirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Silinirken bir hata oluştu'));
     },
   });
 };

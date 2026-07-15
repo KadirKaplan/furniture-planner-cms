@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../services/products';
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
+import { getApiErrorMessage } from '@/lib/utils';
 
 export const useProducts = () => {
   return useQuery({
@@ -29,8 +30,8 @@ export const useCreateProduct = () => {
       toast.success('Başarıyla oluşturuldu');
       setLocation('/products');
     },
-    onError: () => {
-      toast.error('Oluşturulurken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Oluşturulurken bir hata oluştu'));
     },
   });
 };
@@ -46,8 +47,8 @@ export const useUpdateProduct = () => {
       toast.success('Başarıyla güncellendi');
       setLocation('/products');
     },
-    onError: () => {
-      toast.error('Güncellenirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Güncellenirken bir hata oluştu'));
     },
   });
 };
@@ -61,8 +62,8 @@ export const useDeleteProduct = () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success('Başarıyla silindi');
     },
-    onError: () => {
-      toast.error('Silinirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Silinirken bir hata oluştu'));
     },
   });
 };

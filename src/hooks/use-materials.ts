@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMaterials, getMaterial, createMaterial, updateMaterial, deleteMaterial } from '../services/materials';
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
+import { getApiErrorMessage } from '@/lib/utils';
 
 export const useMaterials = (type?: string) => {
   return useQuery({
@@ -29,8 +30,8 @@ export const useCreateMaterial = () => {
       toast.success('Başarıyla oluşturuldu');
       setLocation('/materials');
     },
-    onError: () => {
-      toast.error('Oluşturulurken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Oluşturulurken bir hata oluştu'));
     },
   });
 };
@@ -46,8 +47,8 @@ export const useUpdateMaterial = () => {
       toast.success('Başarıyla güncellendi');
       setLocation('/materials');
     },
-    onError: () => {
-      toast.error('Güncellenirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Güncellenirken bir hata oluştu'));
     },
   });
 };
@@ -61,8 +62,8 @@ export const useDeleteMaterial = () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       toast.success('Başarıyla silindi');
     },
-    onError: () => {
-      toast.error('Silinirken bir hata oluştu');
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Silinirken bir hata oluştu'));
     },
   });
 };

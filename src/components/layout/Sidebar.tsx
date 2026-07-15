@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, LogOut } from 'lucide-react';
+import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, Users, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Logo } from '../common/Logo';
@@ -12,6 +12,7 @@ const navigation = [
   { name: 'Materyaller', href: '/materials', icon: Layers },
   { name: 'Modüller', href: '/modules', icon: Box },
   { name: 'Ürünler', href: '/products', icon: ShoppingBag },
+  { name: 'Kullanıcılar', href: '/users', icon: Users },
 ];
 
 export const Sidebar = () => {

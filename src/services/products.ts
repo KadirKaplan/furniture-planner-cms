@@ -1,18 +1,6 @@
 import { api } from './api';
 
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  icon?: string;
-  modelUrl?: string;
-  category: { id: string; name: string; slug: string } | string;
-  allowedMaterials: (string | { id: string; name: string; slug?: string })[];
-  basePrice: number;
-  isActive: boolean;
-  parametric?: boolean;
-  // Dimension constraints (cm)
+export interface ProductDimensions {
   defaultWidth?: number;
   defaultHeight?: number;
   defaultDepth?: number;
@@ -22,6 +10,26 @@ export interface Product {
   maxHeight?: number;
   minDepth?: number;
   maxDepth?: number;
+}
+
+export interface ProductAssets {
+  icon?: string;
+  modelUrl?: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  assets?: ProductAssets;
+  category: { id: string; name: string; slug: string } | string;
+  allowedMaterials: (string | { id: string; name: string; slug?: string })[];
+  basePrice: number;
+  isActive: boolean;
+  parametric?: boolean;
+  // Dimension constraints (cm)
+  dimensions?: ProductDimensions;
   // Colors
   availableColors?: string[];
 }

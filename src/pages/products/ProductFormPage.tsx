@@ -24,23 +24,27 @@ const productSchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
   description: z.string().optional(),
-  icon: z.string().optional(),
-  modelUrl: z.string().optional(),
+  assets: z.object({
+    icon: z.string().optional(),
+    modelUrl: z.string().optional(),
+  }),
   category: z.string().min(1, 'Lütfen bir kategori seçin'),
   allowedMaterials: z.array(z.string()).min(1, 'En az bir materyal seçmelisiniz'),
   basePrice: z.coerce.number().min(0, 'Fiyat negatif olamaz'),
   isActive: z.boolean().default(true),
   parametric: z.boolean().default(true),
   // Dimension constraints (cm) — zorunlu ve 0'dan büyük olmalı
-  minWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  maxWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  minHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  maxHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  minDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  maxDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  defaultWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  defaultHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
-  defaultDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+  dimensions: z.object({
+    minWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    maxWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    minHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    maxHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    minDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    maxDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    defaultWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    defaultHeight: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+    defaultDepth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
+  }),
 
   // Colors stored as an array of strings
   availableColors: z.array(z.string()).optional(),
@@ -78,19 +82,23 @@ export const ProductFormPage = () => {
       name: '',
       slug: '',
       description: '',
-      icon: '',
-      modelUrl: '',
+      assets: {
+        icon: '',
+        modelUrl: '',
+      },
       category: '',
       allowedMaterials: [],
       basePrice: 0,
       isActive: true,
       parametric: true,
-      minWidth: undefined,
-      maxWidth: undefined,
-      minHeight: undefined,
-      maxHeight: undefined,
-      minDepth: undefined,
-      maxDepth: undefined,
+      dimensions: {
+        minWidth: undefined,
+        maxWidth: undefined,
+        minHeight: undefined,
+        maxHeight: undefined,
+        minDepth: undefined,
+        maxDepth: undefined,
+      },
       availableColors: [],
     },
   });
@@ -107,8 +115,10 @@ export const ProductFormPage = () => {
         name: product.name,
         slug: product.slug,
         description: product.description ?? '',
-        icon: product.icon ?? '',
-        modelUrl: product.modelUrl ?? '',
+        assets: {
+          icon: product.assets?.icon ?? '',
+          modelUrl: product.assets?.modelUrl ?? '',
+        },
         // category may be a populated object or a plain ID string
         category: extractId(product.category as string | { id: string }),
         // allowedMaterials may be populated objects; extract IDs
@@ -118,15 +128,17 @@ export const ProductFormPage = () => {
         basePrice: product.basePrice ?? 0,
         isActive: product.isActive ?? true,
         parametric: product.parametric ?? true,
-        minWidth: product.minWidth,
-        maxWidth: product.maxWidth,
-        minHeight: product.minHeight,
-        maxHeight: product.maxHeight,
-        minDepth: product.minDepth,
-        maxDepth: product.maxDepth,
-        defaultWidth: product.defaultWidth,
-        defaultHeight: product.defaultHeight,
-        defaultDepth: product.defaultDepth,
+        dimensions: {
+          minWidth: product.dimensions?.minWidth,
+          maxWidth: product.dimensions?.maxWidth,
+          minHeight: product.dimensions?.minHeight,
+          maxHeight: product.dimensions?.maxHeight,
+          minDepth: product.dimensions?.minDepth,
+          maxDepth: product.dimensions?.maxDepth,
+          defaultWidth: product.dimensions?.defaultWidth,
+          defaultHeight: product.dimensions?.defaultHeight,
+          defaultDepth: product.dimensions?.defaultDepth,
+        },
         availableColors: product.availableColors ?? [],
       });
     }
@@ -251,20 +263,20 @@ export const ProductFormPage = () => {
                       label="İkon"
                       kind="icon"
                       slug={slugValue}
-                      value={watch('icon')}
-                      onUploaded={(url) => setValue('icon', url, { shouldValidate: true })}
+                      value={watch('assets.icon')}
+                      onUploaded={(url) => setValue('assets.icon', url, { shouldValidate: true })}
                       onUploadingChange={setIsUploading}
-                      error={errors.icon?.message}
+                      error={errors.assets?.icon?.message}
                     />
 
                     <FileUploadField
                       label="3D Model"
                       kind="model"
                       slug={slugValue}
-                      value={watch('modelUrl')}
-                      onUploaded={(url) => setValue('modelUrl', url, { shouldValidate: true })}
+                      value={watch('assets.modelUrl')}
+                      onUploaded={(url) => setValue('assets.modelUrl', url, { shouldValidate: true })}
                       onUploadingChange={setIsUploading}
-                      error={errors.modelUrl?.message}
+                      error={errors.assets?.modelUrl?.message}
                     />
                   </div>
                 </CardContent>
@@ -290,11 +302,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="0"
-                            className={errors.minWidth ? 'border-destructive' : ''}
-                            {...register('minWidth')}
+                            className={errors.dimensions?.minWidth ? 'border-destructive' : ''}
+                            {...register('dimensions.minWidth')}
                           />
-                          {errors.minWidth && (
-                            <p className="text-sm text-destructive">{errors.minWidth.message}</p>
+                          {errors.dimensions?.minWidth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.minWidth.message}</p>
                           )}
                         </div>
                         <div className="space-y-1">
@@ -304,11 +316,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="—"
-                            className={errors.maxWidth ? 'border-destructive' : ''}
-                            {...register('maxWidth')}
+                            className={errors.dimensions?.maxWidth ? 'border-destructive' : ''}
+                            {...register('dimensions.maxWidth')}
                           />
-                          {errors.maxWidth && (
-                            <p className="text-sm text-destructive">{errors.maxWidth.message}</p>
+                          {errors.dimensions?.maxWidth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.maxWidth.message}</p>
                           )}
                         </div>
                       </div>
@@ -327,11 +339,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="0"
-                            className={errors.minHeight ? 'border-destructive' : ''}
-                            {...register('minHeight')}
+                            className={errors.dimensions?.minHeight ? 'border-destructive' : ''}
+                            {...register('dimensions.minHeight')}
                           />
-                          {errors.minHeight && (
-                            <p className="text-sm text-destructive">{errors.minHeight.message}</p>
+                          {errors.dimensions?.minHeight && (
+                            <p className="text-sm text-destructive">{errors.dimensions.minHeight.message}</p>
                           )}
                         </div>
                         <div className="space-y-1">
@@ -341,11 +353,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="—"
-                            className={errors.maxHeight ? 'border-destructive' : ''}
-                            {...register('maxHeight')}
+                            className={errors.dimensions?.maxHeight ? 'border-destructive' : ''}
+                            {...register('dimensions.maxHeight')}
                           />
-                          {errors.maxHeight && (
-                            <p className="text-sm text-destructive">{errors.maxHeight.message}</p>
+                          {errors.dimensions?.maxHeight && (
+                            <p className="text-sm text-destructive">{errors.dimensions.maxHeight.message}</p>
                           )}
                         </div>
                       </div>
@@ -364,11 +376,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="0"
-                            className={errors.minDepth ? 'border-destructive' : ''}
-                            {...register('minDepth')}
+                            className={errors.dimensions?.minDepth ? 'border-destructive' : ''}
+                            {...register('dimensions.minDepth')}
                           />
-                          {errors.minDepth && (
-                            <p className="text-sm text-destructive">{errors.minDepth.message}</p>
+                          {errors.dimensions?.minDepth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.minDepth.message}</p>
                           )}
                         </div>
                         <div className="space-y-1">
@@ -378,11 +390,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="—"
-                            className={errors.maxDepth ? 'border-destructive' : ''}
-                            {...register('maxDepth')}
+                            className={errors.dimensions?.maxDepth ? 'border-destructive' : ''}
+                            {...register('dimensions.maxDepth')}
                           />
-                          {errors.maxDepth && (
-                            <p className="text-sm text-destructive">{errors.maxDepth.message}</p>
+                          {errors.dimensions?.maxDepth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.maxDepth.message}</p>
                           )}
                         </div>
                       </div>
@@ -411,11 +423,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="—"
-                            className={errors.defaultWidth ? 'border-destructive' : ''}
-                            {...register('defaultWidth')}
+                            className={errors.dimensions?.defaultWidth ? 'border-destructive' : ''}
+                            {...register('dimensions.defaultWidth')}
                           />
-                          {errors.defaultWidth && (
-                            <p className="text-sm text-destructive">{errors.defaultWidth.message}</p>
+                          {errors.dimensions?.defaultWidth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.defaultWidth.message}</p>
                           )}
                         </div>
                       </div>
@@ -435,11 +447,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="—"
-                            className={errors.defaultHeight ? 'border-destructive' : ''}
-                            {...register('defaultHeight')}
+                            className={errors.dimensions?.defaultHeight ? 'border-destructive' : ''}
+                            {...register('dimensions.defaultHeight')}
                           />
-                          {errors.defaultHeight && (
-                            <p className="text-sm text-destructive">{errors.defaultHeight.message}</p>
+                          {errors.dimensions?.defaultHeight && (
+                            <p className="text-sm text-destructive">{errors.dimensions.defaultHeight.message}</p>
                           )}
                         </div>
                       </div>
@@ -458,11 +470,11 @@ export const ProductFormPage = () => {
                             type="number"
                             min="0"
                             placeholder="0"
-                            className={errors.defaultDepth ? 'border-destructive' : ''}
-                            {...register('defaultDepth')}
+                            className={errors.dimensions?.defaultDepth ? 'border-destructive' : ''}
+                            {...register('dimensions.defaultDepth')}
                           />
-                          {errors.defaultDepth && (
-                            <p className="text-sm text-destructive">{errors.defaultDepth.message}</p>
+                          {errors.dimensions?.defaultDepth && (
+                            <p className="text-sm text-destructive">{errors.dimensions.defaultDepth.message}</p>
                           )}
                         </div>
 

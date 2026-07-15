@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background: rounded square, warm dark charcoal -->
+  <rect width="32" height="32" rx="7" fill="#1C1917"/>
+
+  <!-- Stylized chair silhouette (side view) — minimal and geometric -->
+
+  <!-- Chair back (vertical) -->
+  <rect x="8" y="7" width="3" height="14" rx="1.5" fill="#D4A96A"/>
+
+  <!-- Chair seat (horizontal) -->
+  <rect x="8" y="18" width="13" height="3" rx="1.5" fill="#D4A96A"/>
+
+  <!-- Front leg -->
+  <rect x="18" y="21" width="3" height="7" rx="1.5" fill="#D4A96A"/>
+
+  <!-- Back leg (short, partially behind seat) -->
+  <rect x="8" y="21" width="3" height="4" rx="1.5" fill="#B8895A"/>
+
+  <!-- Subtle dot / accent top of back -->
+  <circle cx="9.5" cy="6" r="1.5" fill="#D4A96A"/>
+</svg>

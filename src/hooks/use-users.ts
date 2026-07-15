@@ -1,34 +1,34 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getModules, getModule, createModule, updateModule, deleteModule } from '../services/modules';
+import { getUsers, getUser, createUser, updateUser, deleteUser } from '../services/users';
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
 import { getApiErrorMessage } from '@/lib/utils';
 
-export const useModules = () => {
+export const useUsers = () => {
   return useQuery({
-    queryKey: ['modules'],
-    queryFn: getModules,
+    queryKey: ['users'],
+    queryFn: getUsers,
   });
 };
 
-export const useModule = (id: string | null) => {
+export const useUser = (id: string | null) => {
   return useQuery({
-    queryKey: ['modules', id],
-    queryFn: () => getModule(id!),
+    queryKey: ['users', id],
+    queryFn: () => getUser(id!),
     enabled: !!id,
   });
 };
 
-export const useCreateModule = () => {
+export const useCreateUser = () => {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
   return useMutation({
-    mutationFn: createModule,
+    mutationFn: createUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Başarıyla oluşturuldu');
-      setLocation('/modules');
+      setLocation('/users');
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, 'Oluşturulurken bir hata oluştu'));
@@ -36,16 +36,16 @@ export const useCreateModule = () => {
   });
 };
 
-export const useUpdateModule = () => {
+export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => updateModule(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => updateUser(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Başarıyla güncellendi');
-      setLocation('/modules');
+      setLocation('/users');
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, 'Güncellenirken bir hata oluştu'));
@@ -53,13 +53,13 @@ export const useUpdateModule = () => {
   });
 };
 
-export const useDeleteModule = () => {
+export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteModule,
+    mutationFn: deleteUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Başarıyla silindi');
     },
     onError: (error) => {

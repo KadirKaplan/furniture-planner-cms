@@ -5,8 +5,8 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  icon: string;
-  modelUrl: string;
+  icon?: string;
+  modelUrl?: string;
   order: number;
   isActive: boolean;
 }

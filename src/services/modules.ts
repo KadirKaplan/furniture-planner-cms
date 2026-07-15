@@ -7,8 +7,8 @@ export interface Module {
   name: string;
   slug: string;
   description?: string;
-  icon: string;
-  modelUrl: string;
+  icon?: string;
+  modelUrl?: string;
   type: ModuleType;
   priceModifier: number;
   isActive: boolean;
