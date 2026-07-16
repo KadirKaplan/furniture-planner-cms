@@ -62,8 +62,8 @@ export const ProductFormPage = () => {
   const [colorInput, setColorInput] = useState('');
 
   const { data: product, isLoading: loadingProduct } = useProduct(isEdit ? id : null);
-  const { data: categories, isLoading: loadingCategories } = useCategories();
-  const { data: materials, isLoading: loadingMaterials } = useMaterials();
+  const { data: categories, isLoading: loadingCategories, isError: categoriesFailed } = useCategories();
+  const { data: materials, isLoading: loadingMaterials, isError: materialsFailed } = useMaterials();
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -495,6 +495,11 @@ export const ProductFormPage = () => {
                       {errors.allowedMaterials.message}
                     </p>
                   )}
+                  {materialsFailed && (
+                    <p className="text-sm text-destructive mb-4">
+                      Materyaller yüklenemedi. Lütfen sayfayı yenileyip tekrar deneyin.
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {materials?.map((material) => (
                       <div
@@ -568,6 +573,11 @@ export const ProductFormPage = () => {
                     {errors.category && (
                       <p className="text-sm text-destructive">
                         {errors.category.message}
+                      </p>
+                    )}
+                    {categoriesFailed && (
+                      <p className="text-sm text-destructive">
+                        Kategoriler yüklenemedi. Lütfen sayfayı yenileyip tekrar deneyin.
                       </p>
                     )}
                   </div>

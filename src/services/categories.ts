@@ -12,7 +12,10 @@ export interface Category {
 }
 
 export const getCategories = async () => {
-  const { data } = await api.get('/categories');
+  // Admin CMS always needs the full list (active + inactive) so categories
+  // that were toggled off don't silently vanish and become unmanageable —
+  // mirrors the `all=true` convention used by getMaterials().
+  const { data } = await api.get('/categories', { params: { all: 'true' } });
   return data.data as Category[];
 };
 
