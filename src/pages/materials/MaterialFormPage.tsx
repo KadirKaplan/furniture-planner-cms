@@ -145,7 +145,11 @@ export const MaterialFormPage = () => {
                       // syncing dynamically-loaded items; ignore non-selections.
                       if (value) setValue('type', value, { shouldValidate: true });
                     }}
-                    value={watch('type')}
+                    // Radix's controlled `value` must be `undefined` (not `''`) when
+                    // nothing is selected — an empty-string value combined with the
+                    // hidden native <select> Radix renders inside this <form> is what
+                    // caused the dropdown to intermittently fail to open.
+                    value={watch('type') || undefined}
                   >
                     <SelectTrigger className={errors.type ? 'border-destructive' : ''}>
                       <SelectValue placeholder="Tip seçin">

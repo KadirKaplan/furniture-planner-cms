@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <!-- Ana gradient: sol üst köşeden ışık vuruyor -->
+    <linearGradient id="diamondGrad" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%"   stop-color="#7EC491"/>
+      <stop offset="40%"  stop-color="#5BA870"/>
+      <stop offset="100%" stop-color="#3D7A50"/>
+    </linearGradient>
+
+    <!-- İnce iç parlaklık için radial gradient -->
+    <radialGradient id="sheen" cx="35%" cy="32%" r="45%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Drop shadow filtresi -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#2A5C3A" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Hafif yuvarlatılmış elmas şekli — logodaki ile birebir oran -->
+  <rect
+    x="5.5" y="5.5"
+    width="21" height="21"
+    rx="3.5"
+    transform="rotate(45 16 16)"
+    fill="url(#diamondGrad)"
+    filter="url(#shadow)"
+  />
+
+  <!-- Yüzey parlaklığı (sol üst köşe) -->
+  <rect
+    x="5.5" y="5.5"
+    width="21" height="21"
+    rx="3.5"
+    transform="rotate(45 16 16)"
+    fill="url(#sheen)"
+  />
+
+  <!-- İnce kenar çizgisi (derinlik hissi) -->
+  <rect
+    x="5.5" y="5.5"
+    width="21" height="21"
+    rx="3.5"
+    transform="rotate(45 16 16)"
+    fill="none"
+    stroke="#3A6E47"
+    stroke-width="0.6"
+    opacity="0.5"
+  />
+</svg>

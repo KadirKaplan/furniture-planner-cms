@@ -544,7 +544,11 @@ export const ProductFormPage = () => {
                         // syncing dynamically-loaded items; ignore non-selections.
                         if (value) setValue('category', value, { shouldValidate: true });
                       }}
-                      value={watch('category')}
+                      // Radix's controlled `value` must be `undefined` (not `''`) when
+                      // nothing is selected — an empty-string value combined with the
+                      // hidden native <select> Radix renders inside this <form> is what
+                      // caused the dropdown to intermittently fail to open.
+                      value={watch('category') || undefined}
                     >
                       <SelectTrigger
                         className={errors.category ? 'border-destructive' : ''}
