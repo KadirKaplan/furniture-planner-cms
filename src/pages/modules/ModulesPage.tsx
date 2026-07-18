@@ -44,14 +44,16 @@ export const ModulesPage = () => {
 
         <div className="rounded-md border border-border bg-card overflow-hidden">
           {isLoading ? (
-            <TableSkeleton columns={5} rows={5} />
+            <TableSkeleton columns={7} rows={5} />
           ) : filteredModules.length > 0 ? (
             <Table>
               <TableHeader className="bg-muted/30">
                 <TableRow>
+                  <TableHead className="w-[56px]"></TableHead>
                   <TableHead className="w-[250px]">İsim</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Fiyat Etkisi</TableHead>
+                  <TableHead>Özelleştirilebilir</TableHead>
                   <TableHead>Durum</TableHead>
                   <TableHead className="text-right">İşlemler</TableHead>
                 </TableRow>
@@ -65,9 +67,37 @@ export const ModulesPage = () => {
                     transition={{ delay: i * 0.05 }}
                     className="border-b border-border transition-colors hover:bg-muted/20 data-[state=selected]:bg-muted"
                   >
-                    <TableCell className="font-medium">{mod.name}</TableCell>
+                    <TableCell>
+                      {mod.assets?.icon ? (
+                        <img
+                          src={mod.assets.icon}
+                          alt={mod.name}
+                          className="h-8 w-8 rounded object-contain border border-border bg-background"
+                        />
+                      ) : (
+                        <div
+                          className="h-8 w-8 rounded border border-border"
+                          style={{ backgroundColor: mod.swatchColor || 'transparent' }}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {mod.name}
+                      {mod.submodules && mod.submodules.length > 0 && (
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          ({mod.submodules.length} alt modül)
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{mod.slug}</TableCell>
                     <TableCell className="font-medium text-primary">₺{mod.priceModifier}</TableCell>
+                    <TableCell>
+                      {mod.isCustom ? (
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-medium">Evet</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-muted text-muted-foreground font-medium">Hayır</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {mod.isActive ? (
                         <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-medium">Aktif</Badge>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { useMaterials, useDeleteMaterial } from '@/hooks/use-materials';
 import { materialTypes } from '@/services/materials';
+import type { MaterialType } from '@/services/materials';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +14,22 @@ import { CardSkeleton } from '@/components/common/LoadingSkeleton';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { motion } from 'framer-motion';
 
-const tabs = { all: 'Tümü', ...materialTypes } as const;
-
 export const MaterialsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: materials, isLoading } = useMaterials(activeTab === 'all' ? undefined : activeTab);
+  // Sekmeler yalnızca gerçekten var olan materyal tiplerini gösterir — materialTypes'taki
+  // tüm tipler (ör. Cam, Metal, Supramat, Akrilik) DB'de o tipte hiç materyal yoksa
+  // sekme olarak çıkmaz (Malzeme Ekle formundaki tip seçeneklerini etkilemez).
+  const { data: allMaterials } = useMaterials();
+  const existingTypes = new Set((allMaterials ?? []).map((m) => m.type));
+  const tabs = {
+    all: 'Tümü',
+    ...Object.fromEntries(
+      Object.entries(materialTypes).filter(([key]) => existingTypes.has(key as MaterialType))
+    ),
+  };
   const deleteMaterial = useDeleteMaterial();
 
   const filteredMaterials = materials?.filter(m =>

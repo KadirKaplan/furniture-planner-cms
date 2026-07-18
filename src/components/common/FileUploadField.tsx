@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { UploadCloud, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadIcon, uploadModel, ModuleAssetType } from '@/services/uploads';
+import { uploadIcon, uploadModel } from '@/services/uploads';
 
 interface FileUploadFieldProps {
   label: string;
@@ -14,11 +14,10 @@ interface FileUploadFieldProps {
   onUploaded: (url: string) => void;
   onUploadingChange?: (uploading: boolean) => void;
   error?: string;
-  moduleType?: ModuleAssetType;
   required?: boolean;
 }
 
-const ICON_MAX_BYTES = 800 * 1024;
+const ICON_MAX_BYTES = 1024 * 1024;
 const MODEL_MAX_BYTES = 50 * 1024 * 1024;
 const ICON_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
@@ -30,7 +29,6 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   onUploaded,
   onUploadingChange,
   error,
-  moduleType = 'generic',
   required = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,7 +38,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
 
   const accept = kind === 'icon' ? '.png,.jpg,.jpeg,.webp' : '.glb';
   const maxBytes = kind === 'icon' ? ICON_MAX_BYTES : MODEL_MAX_BYTES;
-  const maxLabel = kind === 'icon' ? '800 KB' : '50 MB';
+  const maxLabel = kind === 'icon' ? '1 MB' : '50 MB';
 
   const validate = (file: File): string | null => {
     const ext = `.${(file.name.split('.').pop() ?? '').toLowerCase()}`;
@@ -77,7 +75,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       const url =
         kind === 'icon'
           ? await uploadIcon(file, slug, setProgress)
-          : await uploadModel(file, slug, moduleType, setProgress);
+          : await uploadModel(file, slug, setProgress);
       onUploaded(url);
       toast.success(kind === 'icon' ? 'İkon yüklendi' : '3D model yüklendi');
     } catch (err: any) {

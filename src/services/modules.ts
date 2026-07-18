@@ -1,21 +1,47 @@
 import { api } from './api';
 
-export type ModuleType = 'generic' | 'door';
+export interface Submodule {
+  id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  // true: assets.icon/modelUrl CDN'e yüklenip özelleştirilebilir (ör. kapak stilleri).
+  // false: model planner'da kod içinde çiziliyor — yükleme yapılamaz.
+  isCustom: boolean;
+  assets?: {
+    icon?: string;
+    modelUrl?: string;
+  };
+  // Yalnızca isCustom modüller için: seçici rozetinin zemin/yazı rengi.
+  swatchColor?: string;
+  swatchTextColor?: string;
+  priceModifier: number;
+  isActive: boolean;
+}
 
 export interface Module {
   id: string;
   name: string;
   slug: string;
   description?: string;
-  icon?: string;
-  modelUrl?: string;
-  type: ModuleType;
+  // true: assets.icon/modelUrl CDN'e yüklenip özelleştirilebilir.
+  // false: model planner'da kod içinde çiziliyor (ör. raf, çekmece) — yükleme yapılamaz.
+  isCustom: boolean;
+  assets?: {
+    icon?: string;
+    modelUrl?: string;
+  };
+  swatchColor?: string;
+  swatchTextColor?: string;
+  // Ana modülün varyantları — ör. Kapak modülünün altına Düz/Kare/Rustik kapak stilleri
+  // birer alt modül olarak eklenir.
+  submodules?: Submodule[];
   priceModifier: number;
   isActive: boolean;
 }
 
 export const getModules = async () => {
-  const { data } = await api.get('/modules');
+  const { data } = await api.get('/modules', { params: { all: 'true' } });
   return data.data as Module[];
 };
 
