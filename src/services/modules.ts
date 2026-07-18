@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { ModuleType } from '@/lib/moduleTypes';
 
 export interface Submodule {
   id?: string;
@@ -23,6 +24,9 @@ export interface Module {
   id: string;
   name: string;
   slug: string;
+  // DAVRANIŞ tipi — planner'ın 3D mantığı ve kategori kuralları slug'a değil buna göre
+  // eşleşir (bkz. lib/moduleTypes.ts).
+  type: ModuleType;
   description?: string;
   // true: assets.icon/modelUrl CDN'e yüklenip özelleştirilebilir.
   // false: model planner'da kod içinde çiziliyor (ör. raf, çekmece) — yükleme yapılamaz.

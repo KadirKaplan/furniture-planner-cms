@@ -19,6 +19,7 @@ import { ProductsPage } from '@/pages/products/ProductsPage';
 import { ProductFormPage } from '@/pages/products/ProductFormPage';
 import { UsersPage } from '@/pages/users/UsersPage';
 import { UserFormPage } from '@/pages/users/UserFormPage';
+import { ModuleRulesPage } from '@/pages/settings/ModuleRulesPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +81,10 @@ function Router() {
       </Route>
       <Route path="/products/:id/edit">
         <ProtectedRoute component={ProductFormPage} />
+      </Route>
+
+      <Route path="/module-rules">
+        <ProtectedRoute component={ModuleRulesPage} />
       </Route>
 
       <Route path="/users">

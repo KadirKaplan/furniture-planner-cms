@@ -28,6 +28,10 @@ export interface Product {
   basePrice: number;
   isActive: boolean;
   parametric?: boolean;
+  // Tek kapağın maksimum genişliği (cm) — dolu ise ürün kapak destekler: planner kapak
+  // sayısını ceil(genişlik / maxDoorWidth) ile hesaplar ve kapak slotu/stil atamasını açar.
+  // null/boş ise üründe kapak sistemi yoktur.
+  maxDoorWidth?: number | null;
   // Dimension constraints (cm)
   dimensions?: ProductDimensions;
   // Colors

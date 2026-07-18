@@ -10,6 +10,7 @@ import { Link } from 'wouter';
 import { TableSkeleton } from '@/components/common/LoadingSkeleton';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { motion } from 'framer-motion';
+import { MODULE_TYPE_LABELS } from '@/lib/moduleTypes';
 
 export const ModulesPage = () => {
   const { data: modules, isLoading } = useModules();
@@ -44,7 +45,7 @@ export const ModulesPage = () => {
 
         <div className="rounded-md border border-border bg-card overflow-hidden">
           {isLoading ? (
-            <TableSkeleton columns={7} rows={5} />
+            <TableSkeleton columns={8} rows={5} />
           ) : filteredModules.length > 0 ? (
             <Table>
               <TableHeader className="bg-muted/30">
@@ -52,6 +53,7 @@ export const ModulesPage = () => {
                   <TableHead className="w-[56px]"></TableHead>
                   <TableHead className="w-[250px]">İsim</TableHead>
                   <TableHead>Slug</TableHead>
+                  <TableHead>Tip</TableHead>
                   <TableHead>Fiyat Etkisi</TableHead>
                   <TableHead>Özelleştirilebilir</TableHead>
                   <TableHead>Durum</TableHead>
@@ -90,6 +92,11 @@ export const ModulesPage = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{mod.slug}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-medium">
+                        {MODULE_TYPE_LABELS[mod.type] ?? mod.type ?? '—'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="font-medium text-primary">₺{mod.priceModifier}</TableCell>
                     <TableCell>
                       {mod.isCustom ? (

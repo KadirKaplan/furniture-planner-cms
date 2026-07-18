@@ -12,7 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUploadField } from '@/components/common/FileUploadField';
+import { GlbPreview } from '@/components/common/GlbPreview';
+import { MODULE_TYPES, MODULE_TYPE_LABELS, MODULE_TYPE_DESCRIPTIONS, type ModuleType } from '@/lib/moduleTypes';
 
 const slugify = (value: string) =>
   value
@@ -41,6 +44,8 @@ const submoduleSchema = z.object({
 const moduleSchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
+  // Davranış tipi kapalı kümeden seçilir — planner'ın 3D mantığı buna göre eşleşir
+  type: z.enum(MODULE_TYPES, { errorMap: () => ({ message: 'Lütfen bir modül tipi seçin' }) }),
   description: z.string().optional(),
   isCustom: z.boolean().default(false),
   assets: z.object({
@@ -84,6 +89,7 @@ export const ModuleFormPage = () => {
     defaultValues: {
       name: '',
       slug: '',
+      type: 'generic',
       description: '',
       isCustom: false,
       assets: {
@@ -106,12 +112,14 @@ export const ModuleFormPage = () => {
   const nameValue = watch('name');
   const slugValue = watch('slug');
   const isCustomValue = watch('isCustom');
+  const typeValue = watch('type');
 
   useEffect(() => {
     if (module && isEdit) {
       reset({
         name: module.name,
         slug: module.slug,
+        type: module.type ?? 'generic',
         description: module.description || '',
         isCustom: module.isCustom ?? false,
         assets: {
@@ -193,6 +201,40 @@ export const ModuleFormPage = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="type">Modül Tipi *</Label>
+                {isEdit ? (
+                  // Tip, davranış sözleşmesinin parçası — mevcut modülde değiştirilemez
+                  // (değiştirmek client'taki 3D davranışını sessizce başka şeye çevirirdi).
+                  <Input value={MODULE_TYPE_LABELS[typeValue] ?? typeValue} disabled />
+                ) : (
+                  <Select
+                    onValueChange={(value) => {
+                      if (value) setValue('type', value as ModuleType, { shouldValidate: true });
+                    }}
+                    value={typeValue || undefined}
+                  >
+                    <SelectTrigger className={errors.type ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Modül tipi seçin">
+                        {typeValue ? MODULE_TYPE_LABELS[typeValue] : undefined}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MODULE_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {MODULE_TYPE_LABELS[t]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
+                <p className="text-xs text-muted-foreground">
+                  {MODULE_TYPE_DESCRIPTIONS[typeValue] ??
+                    'Planner\'ın 3D davranışı ve kategori kuralları bu tipe göre eşleşir — isim ve slug serbesttir.'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="description">Açıklama</Label>
                 <Textarea
                   id="description"
@@ -209,7 +251,7 @@ export const ModuleFormPage = () => {
                 <p className="text-xs text-muted-foreground pt-2 border-t border-border">
                   Bu modül {isCustomValue ? 'özelleştirilebilir' : 'özelleştirilemez'} olarak tanımlanmış
                   {isCustomValue ? ' — aşağıdan alt modül ekleyip düzenleyebilirsiniz.' : '.'}
-                  {' '}İsim, slug, açıklama ve özelleştirme durumu burada değiştirilemez.
+                  {' '}İsim, slug, tip, açıklama ve özelleştirme durumu burada değiştirilemez.
                 </p>
               ) : (
                 <>
@@ -229,27 +271,30 @@ export const ModuleFormPage = () => {
                   </p>
 
                   {isCustomValue && (
-                    <div className="grid gap-4 md:grid-cols-2 pt-2">
-                      <FileUploadField
-                        label="İkon"
-                        kind="icon"
-                        slug={slugValue}
-                        value={watch('assets.icon')}
-                        onUploaded={(url) => setValue('assets.icon', url, { shouldValidate: true })}
-                        onUploadingChange={setIsUploading}
-                        error={errors.assets?.icon?.message}
-                      />
+                    <>
+                      <div className="grid gap-4 md:grid-cols-2 pt-2">
+                        <FileUploadField
+                          label="İkon"
+                          kind="icon"
+                          slug={slugValue}
+                          value={watch('assets.icon')}
+                          onUploaded={(url) => setValue('assets.icon', url, { shouldValidate: true })}
+                          onUploadingChange={setIsUploading}
+                          error={errors.assets?.icon?.message}
+                        />
 
-                      <FileUploadField
-                        label="3D Model"
-                        kind="model"
-                        slug={slugValue}
-                        value={watch('assets.modelUrl')}
-                        onUploaded={(url) => setValue('assets.modelUrl', url, { shouldValidate: true })}
-                        onUploadingChange={setIsUploading}
-                        error={errors.assets?.modelUrl?.message}
-                      />
-                    </div>
+                        <FileUploadField
+                          label="3D Model"
+                          kind="model"
+                          slug={slugValue}
+                          value={watch('assets.modelUrl')}
+                          onUploaded={(url) => setValue('assets.modelUrl', url, { shouldValidate: true })}
+                          onUploadingChange={setIsUploading}
+                          error={errors.assets?.modelUrl?.message}
+                        />
+                      </div>
+                      {!!watch('assets.modelUrl') && <GlbPreview url={watch('assets.modelUrl')!} />}
+                    </>
                   )}
                 </>
               )}
@@ -370,26 +415,31 @@ export const ModuleFormPage = () => {
                       </div>
 
                       {subIsCustom && (
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <FileUploadField
-                            label="İkon"
-                            kind="icon"
-                            slug={subSlug}
-                            value={watch(`submodules.${index}.assets.icon`)}
-                            onUploaded={(url) => setValue(`submodules.${index}.assets.icon`, url, { shouldValidate: true })}
-                            onUploadingChange={setIsUploading}
-                            error={subErrors?.assets?.icon?.message}
-                          />
-                          <FileUploadField
-                            label="3D Model"
-                            kind="model"
-                            slug={subSlug}
-                            value={watch(`submodules.${index}.assets.modelUrl`)}
-                            onUploaded={(url) => setValue(`submodules.${index}.assets.modelUrl`, url, { shouldValidate: true })}
-                            onUploadingChange={setIsUploading}
-                            error={subErrors?.assets?.modelUrl?.message}
-                          />
-                        </div>
+                        <>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <FileUploadField
+                              label="İkon"
+                              kind="icon"
+                              slug={subSlug}
+                              value={watch(`submodules.${index}.assets.icon`)}
+                              onUploaded={(url) => setValue(`submodules.${index}.assets.icon`, url, { shouldValidate: true })}
+                              onUploadingChange={setIsUploading}
+                              error={subErrors?.assets?.icon?.message}
+                            />
+                            <FileUploadField
+                              label="3D Model"
+                              kind="model"
+                              slug={subSlug}
+                              value={watch(`submodules.${index}.assets.modelUrl`)}
+                              onUploaded={(url) => setValue(`submodules.${index}.assets.modelUrl`, url, { shouldValidate: true })}
+                              onUploadingChange={setIsUploading}
+                              error={subErrors?.assets?.modelUrl?.message}
+                            />
+                          </div>
+                          {!!watch(`submodules.${index}.assets.modelUrl`) && (
+                            <GlbPreview url={watch(`submodules.${index}.assets.modelUrl`)!} />
+                          )}
+                        </>
                       )}
 
                       <div className="grid gap-4 md:grid-cols-2">

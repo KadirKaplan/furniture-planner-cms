@@ -19,6 +19,7 @@ import { ArrowLeft, X, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FileUploadField } from '@/components/common/FileUploadField';
+import { GlbPreview } from '@/components/common/GlbPreview';
 
 const productSchema = z.object({
   name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
@@ -33,6 +34,12 @@ const productSchema = z.object({
   basePrice: z.coerce.number().min(0, 'Fiyat negatif olamaz'),
   isActive: z.boolean().default(true),
   parametric: z.boolean().default(true),
+  // Tek kapağın max genişliği (cm) — boş bırakılırsa üründe kapak sistemi yoktur.
+  // Boş string'i null'a çevir: z.coerce.number('') sessizce 0 üretirdi.
+  maxDoorWidth: z.preprocess(
+    (v) => (v === '' || v === undefined || v === null ? null : Number(v)),
+    z.number().positive('0\'dan büyük olmalıdır').nullable()
+  ),
   // Dimension constraints (cm) — zorunlu ve 0'dan büyük olmalı
   dimensions: z.object({
     minWidth: z.coerce.number().positive('Bu alan zorunludur ve 0\'dan büyük olmalıdır'),
@@ -91,6 +98,7 @@ export const ProductFormPage = () => {
       basePrice: 0,
       isActive: true,
       parametric: true,
+      maxDoorWidth: null,
       dimensions: {
         minWidth: undefined,
         maxWidth: undefined,
@@ -128,6 +136,7 @@ export const ProductFormPage = () => {
         basePrice: product.basePrice ?? 0,
         isActive: product.isActive ?? true,
         parametric: product.parametric ?? true,
+        maxDoorWidth: product.maxDoorWidth ?? null,
         dimensions: {
           minWidth: product.dimensions?.minWidth,
           maxWidth: product.dimensions?.maxWidth,
@@ -279,6 +288,18 @@ export const ProductFormPage = () => {
                       error={errors.assets?.modelUrl?.message}
                     />
                   </div>
+
+                  {!!watch('assets.modelUrl') && (
+                    <GlbPreview
+                      url={watch('assets.modelUrl')!}
+                      mode="product"
+                      targetCm={{
+                        width: Number(watch('dimensions.defaultWidth')) || 0,
+                        height: Number(watch('dimensions.defaultHeight')) || 0,
+                        depth: Number(watch('dimensions.defaultDepth')) || 0,
+                      }}
+                    />
+                  )}
                 </CardContent>
               </Card>
 
@@ -631,6 +652,32 @@ export const ProductFormPage = () => {
                       Parametrik (Özel Ölçü)
                     </Label>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Kapak sistemi */}
+              <Card className="border-border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg">Kapak Sistemi</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Label htmlFor="maxDoorWidth">Tek Kapak Max Genişlik (cm)</Label>
+                  <Input
+                    id="maxDoorWidth"
+                    type="number"
+                    min="0"
+                    placeholder="Boş = kapak yok"
+                    {...register('maxDoorWidth')}
+                    className={errors.maxDoorWidth ? 'border-destructive' : ''}
+                  />
+                  {errors.maxDoorWidth && (
+                    <p className="text-sm text-destructive">{errors.maxDoorWidth.message}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Dolu ise planner bu üründe kapak sistemini açar: kapak sayısı{' '}
+                    <span className="font-mono">ceil(genişlik / bu değer)</span> ile hesaplanır,
+                    kapak stili ataması yapılabilir. Boş bırakılırsa üründe kapak yoktur.
+                  </p>
                 </CardContent>
               </Card>
 

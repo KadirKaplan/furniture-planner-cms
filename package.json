@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "axios": "^1.18.1"
+    "axios": "^1.18.1",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -47,6 +48,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^5.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
