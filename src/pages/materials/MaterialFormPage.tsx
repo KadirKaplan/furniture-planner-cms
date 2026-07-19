@@ -29,7 +29,9 @@ const materialSchema = z.object({
   slug: z.string().min(2, 'Slug en az 2 karakter olmalıdır'),
   type: z.string().min(1, 'Lütfen bir tip seçin'),
   description: z.string().optional(),
-  priceModifier: z.coerce.number().default(0),
+  // NOT: materyal seviyesinde fiyat etkisi yok — materyalin fiyat etkisi ürün
+  // formundaki "Özel taban fiyat (₺)" ile ürün başına yönetilir. Renk seviyesindeki
+  // priceModifier (%) ise duruyor.
   isActive: z.boolean().default(true),
   colors: z.array(colorSchema),
 });
@@ -53,7 +55,6 @@ export const MaterialFormPage = () => {
       slug: '',
       type: '',
       description: '',
-      priceModifier: 0,
       isActive: true,
       colors: [],
     },
@@ -70,7 +71,6 @@ export const MaterialFormPage = () => {
         slug: material.slug,
         type: material.type,
         description: material.description || '',
-        priceModifier: material.priceModifier,
         isActive: material.isActive,
         colors: material.colors ?? [],
       });
@@ -165,10 +165,6 @@ export const MaterialFormPage = () => {
                   {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="priceModifier">Fiyat Etkisi (₺) *</Label>
-                  <Input id="priceModifier" type="number" {...register('priceModifier')} className={errors.priceModifier ? 'border-destructive' : ''} />
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -228,7 +224,7 @@ export const MaterialFormPage = () => {
                     <Input {...register(`colors.${index}.code` as const)} />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Fiyat Etkisi (₺)</Label>
+                    <Label className="text-xs">Fiyat Etkisi (%)</Label>
                     <Input type="number" {...register(`colors.${index}.priceModifier` as const)} />
                   </div>
                   <Button

@@ -32,6 +32,10 @@ const productSchema = z.object({
   category: z.string().min(1, 'Lütfen bir kategori seçin'),
   allowedMaterials: z.array(z.string()).min(1, 'En az bir materyal seçmelisiniz'),
   basePrice: z.coerce.number().min(0, 'Fiyat negatif olamaz'),
+  // Materyal başına özel taban fiyat (₺) — materialId → input değeri (string).
+  // Boş bırakılan materyal için global yüzde modifier davranışı sürer; submit'te
+  // dolu olanlar API'nin beklediği { material, basePrice } dizisine çevrilir.
+  materialBasePrices: z.record(z.string()).optional(),
   isActive: z.boolean().default(true),
   parametric: z.boolean().default(true),
   // Tek kapağın max genişliği (cm) — boş bırakılırsa üründe kapak sistemi yoktur.
@@ -95,6 +99,7 @@ export const ProductFormPage = () => {
       },
       category: '',
       allowedMaterials: [],
+      materialBasePrices: {},
       basePrice: 0,
       isActive: true,
       parametric: true,
@@ -115,6 +120,7 @@ export const ProductFormPage = () => {
   const slugValue = watch('slug');
   const availableColors = watch('availableColors') ?? [];
   const allowedMaterials = watch('allowedMaterials') ?? [];
+  const materialBasePrices = watch('materialBasePrices') ?? {};
 
   // Populate form when editing
   useEffect(() => {
@@ -132,6 +138,14 @@ export const ProductFormPage = () => {
         // allowedMaterials may be populated objects; extract IDs
         allowedMaterials: (product.allowedMaterials ?? []).map((m) =>
           extractId(m as string | { id: string })
+        ),
+        // API'den { material, basePrice }[] gelir; form input'ları için
+        // materialId → string değer sözlüğüne çevir
+        materialBasePrices: Object.fromEntries(
+          (product.materialBasePrices ?? []).map((mp) => [
+            extractId(mp.material as string | { id: string }),
+            String(mp.basePrice),
+          ])
         ),
         basePrice: product.basePrice ?? 0,
         isActive: product.isActive ?? true,
@@ -186,10 +200,23 @@ export const ProductFormPage = () => {
   };
 
   const onSubmit = (data: ProductForm) => {
+    // Materyal başına özel taban fiyat sözlüğünü API'nin beklediği diziye çevir:
+    // yalnızca izinli materyaller ve 0'dan büyük geçerli sayılar gönderilir.
+    const payload = {
+      ...data,
+      materialBasePrices: Object.entries(data.materialBasePrices ?? {})
+        .filter(
+          ([matId, val]) =>
+            data.allowedMaterials.includes(matId) &&
+            val.trim() !== '' &&
+            Number(val) > 0
+        )
+        .map(([material, val]) => ({ material, basePrice: Number(val) })),
+    };
     if (isEdit) {
-      updateProduct.mutate({ id: id!, data });
+      updateProduct.mutate({ id: id!, data: payload });
     } else {
-      createProduct.mutate(data);
+      createProduct.mutate(payload);
     }
   };
 
@@ -525,30 +552,62 @@ export const ProductFormPage = () => {
                     {materials?.map((material) => (
                       <div
                         key={material.id}
-                        className="flex items-center space-x-2 p-2 border border-border rounded-md hover:bg-muted/30 transition-colors"
+                        className="flex flex-col gap-2 p-2 border border-border rounded-md hover:bg-muted/30 transition-colors"
                       >
-                        <Checkbox
-                          id={`material-${material.id}`}
-                          checked={allowedMaterials.includes(material.id)}
-                          onCheckedChange={(checked) => {
-                            setValue(
-                              'allowedMaterials',
-                              checked
-                                ? [...allowedMaterials, material.id]
-                                : allowedMaterials.filter((v) => v !== material.id),
-                              { shouldValidate: true }
-                            );
-                          }}
-                        />
-                        <Label
-                          htmlFor={`material-${material.id}`}
-                          className="text-sm font-normal cursor-pointer flex-1"
-                        >
-                          {material.name}
-                        </Label>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`material-${material.id}`}
+                            checked={allowedMaterials.includes(material.id)}
+                            onCheckedChange={(checked) => {
+                              setValue(
+                                'allowedMaterials',
+                                checked
+                                  ? [...allowedMaterials, material.id]
+                                  : allowedMaterials.filter((v) => v !== material.id),
+                                { shouldValidate: true }
+                              );
+                              // Materyal çıkarılınca özel taban fiyatı da temizle —
+                              // yeniden eklendiğinde eski değer sessizce geri gelmesin.
+                              if (!checked) {
+                                const { [material.id]: _removed, ...rest } = materialBasePrices;
+                                setValue('materialBasePrices', rest);
+                              }
+                            }}
+                          />
+                          <Label
+                            htmlFor={`material-${material.id}`}
+                            className="text-sm font-normal cursor-pointer flex-1"
+                          >
+                            {material.name}
+                          </Label>
+                        </div>
+                        {/* Ürün başına materyal taban fiyatı: doluysa fiyat hesabında
+                            basePrice yerine bu değer kullanılır (global % modifier
+                            uygulanmaz); boşsa materyalin genel yüzdesi geçerli. */}
+                        {allowedMaterials.includes(material.id) && (
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Özel taban fiyat (₺)"
+                            className="h-8 text-sm"
+                            value={materialBasePrices[material.id] ?? ''}
+                            onChange={(e) =>
+                              setValue('materialBasePrices', {
+                                ...materialBasePrices,
+                                [material.id]: e.target.value,
+                              })
+                            }
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Özel taban fiyat girilen materyal seçildiğinde ürünün taban fiyatı
+                    yerine bu değer kullanılır ve materyalin genel yüzde etkisi uygulanmaz.
+                    Boş bırakılırsa materyalin genel yüzde etkisi geçerli olur.
+                  </p>
                 </CardContent>
               </Card>
             </div>

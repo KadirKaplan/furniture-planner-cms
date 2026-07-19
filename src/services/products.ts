@@ -26,6 +26,10 @@ export interface Product {
   category: { id: string; name: string; slug: string } | string;
   allowedMaterials: (string | { id: string; name: string; slug?: string })[];
   basePrice: number;
+  // Ürün başına materyal taban fiyatı override'ı: seçilen materyal bu listedeyse
+  // fiyat hesabında basePrice yerine buradaki değer kullanılır ve materyalin global
+  // yüzde modifier'ı uygulanmaz (ör. MDF Lake bu üründe 20.000₺, başka üründe 15.000₺).
+  materialBasePrices?: { material: string | { id: string }; basePrice: number }[];
   isActive: boolean;
   parametric?: boolean;
   // Tek kapağın maksimum genişliği (cm) — dolu ise ürün kapak destekler: planner kapak

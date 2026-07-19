@@ -27,7 +27,9 @@ export interface Material {
   slug: string;
   type: MaterialType;
   description?: string;
-  priceModifier: number;
+  // NOT: materyal seviyesinde fiyat etkisi yok — materyalin fiyat etkisi ürün başına
+  // Product.materialBasePrices ("Özel taban fiyat") ile yönetilir. Renk seviyesindeki
+  // priceModifier (%) duruyor.
   colors: MaterialColor[];
   isActive: boolean;
 }
