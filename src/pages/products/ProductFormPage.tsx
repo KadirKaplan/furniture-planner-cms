@@ -336,7 +336,7 @@ export const ProductFormPage = () => {
                   <CardTitle className="text-lg">Boyut Kısıtları (cm)</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     {/* Width */}
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -458,7 +458,7 @@ export const ProductFormPage = () => {
                   <CardTitle className="text-lg">Default Ölçüler (cm)</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     {/* Width */}
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -799,7 +799,7 @@ export const ProductFormPage = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 [&>button]:w-full sm:[&>button]:w-auto">
             <Button
               type="button"
               variant="outline"

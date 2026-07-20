@@ -127,7 +127,7 @@ export const UserFormPage = () => {
                 </Label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 border-t border-border mt-8">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 border-t border-border mt-8 [&>button]:w-full sm:[&>button]:w-auto">
                 <Button type="button" variant="outline" onClick={() => setLocation('/users')}>
                   İptal
                 </Button>

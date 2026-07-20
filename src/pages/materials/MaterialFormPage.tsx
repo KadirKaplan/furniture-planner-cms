@@ -203,7 +203,7 @@ export const MaterialFormPage = () => {
                 <p className="text-sm text-muted-foreground">Henüz renk eklenmedi.</p>
               )}
               {fields.map((field, index) => (
-                <div key={field.id} className="grid gap-3 md:grid-cols-[auto_1fr_1fr_1fr_1fr_auto] items-end p-3 border border-border rounded-md">
+                <div key={field.id} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[auto_1fr_1fr_1fr_1fr_auto] items-end p-3 border border-border rounded-md">
                   <div
                     className="w-8 h-8 rounded-full border border-border shrink-0"
                     style={{ backgroundColor: watch(`colors.${index}.hex`) || '#e2ece8' }}
@@ -241,7 +241,7 @@ export const MaterialFormPage = () => {
             </CardContent>
           </Card>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>button]:w-full sm:[&>button]:w-auto">
             <Button type="button" variant="outline" onClick={() => setLocation('/materials')}>
               İptal
             </Button>

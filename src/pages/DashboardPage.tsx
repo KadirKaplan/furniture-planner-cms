@@ -38,7 +38,7 @@ export const DashboardPage = () => {
     <Layout title={`Genel Bakış — ${today}`}>
       <div className="space-y-8">
         {/* Actions Row */}
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
           <Link href="/categories/new">
             <Button className="gap-2"><Plus className="w-4 h-4" /> Kategori Ekle</Button>
           </Link>

@@ -25,8 +25,8 @@ export const CategoriesPage = () => {
   return (
     <Layout title="Kategoriler">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="relative w-72">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Kategori ara..." 
@@ -35,14 +35,14 @@ export const CategoriesPage = () => {
               className="pl-9 bg-card"
             />
           </div>
-          <Link href="/categories/new">
-            <Button className="gap-2">
+          <Link href="/categories/new" className="block w-full sm:w-auto">
+            <Button className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Yeni Kategori
             </Button>
           </Link>
         </div>
 
-        <div className="rounded-md border border-border bg-card overflow-hidden">
+        <div className="rounded-md border border-border bg-card overflow-x-auto">
           {isLoading ? (
             <TableSkeleton columns={5} rows={5} />
           ) : filteredCategories.length > 0 ? (

@@ -485,7 +485,7 @@ export const ModuleFormPage = () => {
           )}
 
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end [&>button]:w-full sm:[&>button]:w-auto">
             <Button type="button" variant="outline" onClick={() => setLocation('/modules')}>
               İptal
             </Button>

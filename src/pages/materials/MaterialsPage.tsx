@@ -65,7 +65,7 @@ export const MaterialsPage = () => {
                 className="pl-9 bg-card"
               />
             </div>
-            <Link href="/materials/new">
+            <Link href="/materials/new" className="shrink-0">
               <Button className="gap-2">
                 <Plus className="h-4 w-4" /> Yeni Materyal
               </Button>
