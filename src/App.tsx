@@ -20,6 +20,8 @@ import { ProductFormPage } from '@/pages/products/ProductFormPage';
 import { UsersPage } from '@/pages/users/UsersPage';
 import { UserFormPage } from '@/pages/users/UserFormPage';
 import { ModuleRulesPage } from '@/pages/settings/ModuleRulesPage';
+import { QuoteRequestsPage } from '@/pages/quotes/QuoteRequestsPage';
+import { QuoteRequestDetailPage } from '@/pages/quotes/QuoteRequestDetailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +87,13 @@ function Router() {
 
       <Route path="/module-rules">
         <ProtectedRoute component={ModuleRulesPage} />
+      </Route>
+
+      <Route path="/quote-requests">
+        <ProtectedRoute component={QuoteRequestsPage} />
+      </Route>
+      <Route path="/quote-requests/:id">
+        <ProtectedRoute component={QuoteRequestDetailPage} />
       </Route>
 
       <Route path="/users">

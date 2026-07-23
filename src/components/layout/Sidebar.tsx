@@ -1,10 +1,15 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, Users, LogOut, SlidersHorizontal } from 'lucide-react';
+import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, Users, LogOut, SlidersHorizontal, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuoteRequestStats } from '@/hooks/use-quote-requests';
 import { cn } from '@/lib/utils';
 import { Logo } from '../common/Logo';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Bu yolun rozeti okunmamış (durumu "yeni") teklif sayısını gösterir. Sabit yerine
+// href üzerinden eşleştiriyoruz ki menü sırası değişince rozet başka bir satıra kaymasın.
+const QUOTE_REQUESTS_HREF = '/quote-requests';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -13,6 +18,7 @@ const navigation = [
   { name: 'Modüller', href: '/modules', icon: Box },
   { name: 'Modül Kuralları', href: '/module-rules', icon: SlidersHorizontal },
   { name: 'Ürünler', href: '/products', icon: ShoppingBag },
+  { name: 'Teklif İstekleri', href: '/quote-requests', icon: FileText },
   { name: 'Kullanıcılar', href: '/users', icon: Users },
 ];
 
@@ -28,6 +34,13 @@ export const Sidebar = ({ collapsed = false, onNavigate }: SidebarProps) => {
   const { user, logout } = useAuth();
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+  // Müşteri teklifleri admin bir şey yapmadan da gelir, bu yüzden sayaç periyodik
+  // olarak tazelenir (bkz. useQuoteRequestStats). Yalnızca admin'in erişebildiği bir
+  // uç olduğu için yetkisiz kullanıcıda sorgu hata verir ve rozet hiç görünmez —
+  // istenen davranış bu.
+  const { data: quoteStats } = useQuoteRequestStats();
+  const newQuoteCount = quoteStats?.byStatus?.yeni ?? 0;
 
   return (
     <div
@@ -54,6 +67,10 @@ export const Sidebar = ({ collapsed = false, onNavigate }: SidebarProps) => {
         <nav className="flex-1 space-y-1">
           {navigation.map((item) => {
             const isActive = location.startsWith(item.href);
+            const badgeCount = item.href === QUOTE_REQUESTS_HREF ? newQuoteCount : 0;
+            // 99'un üstünde sayı rozeti raya sığmayacak kadar genişletiyor.
+            const badgeLabel = badgeCount > 99 ? '99+' : String(badgeCount);
+
             const link = (
               <Link key={item.name} href={item.href} className="block" onClick={onNavigate}>
                 <div
@@ -65,15 +82,34 @@ export const Sidebar = ({ collapsed = false, onNavigate }: SidebarProps) => {
                       : 'text-sidebar-foreground/80 border-transparent hover:bg-sidebar-accent hover:text-sidebar-foreground'
                   )}
                 >
-                  <item.icon
-                    className={cn(
-                      'h-5 w-5 shrink-0 transition-colors',
-                      collapsed ? '' : 'mr-3',
-                      isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground/80'
+                  <div className={cn('relative shrink-0', collapsed ? '' : 'mr-3')}>
+                    <item.icon
+                      className={cn(
+                        'h-5 w-5 shrink-0 transition-colors',
+                        isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground/80'
+                      )}
+                      aria-hidden="true"
+                    />
+                    {/* Ray daraltılmışken etiket görünmediğinden sayı sığmaz; ikonun
+                        köşesinde yalnızca bir nokta gösterilir, sayı tooltip'e taşınır. */}
+                    {collapsed && badgeCount > 0 && (
+                      <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-sidebar" />
                     )}
-                    aria-hidden="true"
-                  />
-                  {!collapsed && item.name}
+                  </div>
+
+                  {!collapsed && (
+                    <>
+                      {item.name}
+                      {badgeCount > 0 && (
+                        <span
+                          className="ml-auto min-w-5 rounded-full bg-destructive px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none text-destructive-foreground"
+                          aria-label={`${badgeCount} okunmamış teklif isteği`}
+                        >
+                          {badgeLabel}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
               </Link>
             );
@@ -82,7 +118,10 @@ export const Sidebar = ({ collapsed = false, onNavigate }: SidebarProps) => {
             return collapsed ? (
               <Tooltip key={item.name}>
                 <TooltipTrigger asChild>{link}</TooltipTrigger>
-                <TooltipContent side="right">{item.name}</TooltipContent>
+                <TooltipContent side="right">
+                  {item.name}
+                  {badgeCount > 0 && ` · ${badgeLabel} yeni`}
+                </TooltipContent>
               </Tooltip>
             ) : link;
           })}
