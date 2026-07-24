@@ -59,6 +59,14 @@ export const QuoteRequestDetailPage = () => {
     setAdminNote(quote.adminNote ?? '');
   }, [quote]);
 
+  // wouter aynı bileşeni /quote-requests/A → /quote-requests/B geçişlerinde yeniden
+  // kullanır (remount olmaz), bu yüzden viewVersion route değişmeden sıfırlanmazsa
+  // B'de de aynı numaralı bir eski revizyon varsa B'nin GÜNCEL revizyonu yerine
+  // sessizce o eski revizyon gösterilir. id her değiştiğinde "güncel revizyon"a dön.
+  useEffect(() => {
+    setViewVersion(null);
+  }, [id]);
+
   const isDirty =
     !!quote && (status !== quote.status || adminNote !== (quote.adminNote ?? ''));
 

@@ -5,6 +5,7 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, Redirect } from 'wouter';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { QuoteNotificationWatcher } from '@/components/common/QuoteNotificationWatcher';
 
 // Pages
 import { LoginPage } from '@/pages/LoginPage';
@@ -118,6 +119,9 @@ function App() {
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
             <Router />
+            {/* Sayfa geçişlerinden etkilenmesin diye Router'ın (ve dolayısıyla her
+                sayfanın kendi Sidebar'ının) DIŞINDA, tek sefer mount edilir. */}
+            <QuoteNotificationWatcher />
           </WouterRouter>
           <Toaster richColors position="top-right" />
         </TooltipProvider>

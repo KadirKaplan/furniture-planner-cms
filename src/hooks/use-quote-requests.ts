@@ -12,6 +12,7 @@ import type { QuoteStatus } from '@/lib/quoteStatuses';
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
 import { getApiErrorMessage } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useQuoteRequests = (filters: QuoteRequestFilters = {}) => {
   return useQuery({
@@ -31,20 +32,33 @@ export const useQuoteRequest = (id: string | null) => {
 };
 
 /**
- * Kenar çubuğundaki "okunmamış teklif" rozetini besler. Teklifler admin bir işlem
- * yapmadan (müşteri planner'dan gönderdiğinde) geldiği için sorgu periyodik olarak
- * tazelenir — aksi halde rozet ancak sayfa yenilenince güncellenirdi.
+ * Kenar çubuğundaki "okunmamış teklif" rozetini ve yeni-teklif ses/kart bildirimini
+ * besler. Teklifler admin bir işlem yapmadan (müşteri planner'dan gönderdiğinde)
+ * geldiği için sorgu periyodik olarak tazelenir — aksi halde rozet ancak sayfa
+ * yenilenince güncellenirdi.
  *
- * 60 sn: showroom'da anlık bildirim beklentisi yok, sayaç birkaç dakika geç görünse
+ * 60 sn: anlık (saniyelik) bildirim beklentisi yok, sayaç birkaç dakika geç görünse
  * sorun olmaz; daha sık yoklamak her admin sekmesi için gereksiz istek üretir.
- * Sekme arkaplandayken yoklama durur, öne gelince hemen tazelenir.
+ * Yoklama sekme arkaplandayken de DEVAM eder (refetchIntervalInBackground: true) —
+ * admin başka bir sekmedeyken de ses/kart bildirimi gelsin diye; aksi halde tarayıcı
+ * sekme öne gelene kadar sorguyu durdurur ve bildirim geç/hiç gelmezdi.
+ *
+ * enabled: isAuthenticated ŞART — bu sorgu App.tsx'te Router'ın DIŞINDA, oturum
+ * durumundan bağımsız her zaman mount edilen QuoteNotificationWatcher tarafından da
+ * okunuyor. Girişten önce (örn. /login ekranındayken) token yokken bu istek atılırsa
+ * API 401 döner, axios interceptor'ı bunu "oturum düştü" sayıp sert bir
+ * window.location.href yönlendirmesiyle sayfayı /login'e YENİDEN YÜKLER — bu da aynı
+ * sorguyu tekrar tetikleyip kendini tekrar eden bir reload döngüsüne dönüşür. Sorgu
+ * yalnızca giriş yapılmışken çalışmalı.
  */
 export const useQuoteRequestStats = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ['quote-requests', 'stats'],
     queryFn: getQuoteRequestStats,
+    enabled: isAuthenticated,
     refetchInterval: 60_000,
-    refetchIntervalInBackground: false,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
     // Yetkisiz kullanıcıda (admin olmayan rol) 403 döner; tekrar denemenin anlamı yok,
     // rozet sessizce görünmez kalır.

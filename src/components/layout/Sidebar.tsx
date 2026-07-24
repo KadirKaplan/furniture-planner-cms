@@ -39,6 +39,10 @@ export const Sidebar = ({ collapsed = false, onNavigate }: SidebarProps) => {
   // olarak tazelenir (bkz. useQuoteRequestStats). Yalnızca admin'in erişebildiği bir
   // uç olduğu için yetkisiz kullanıcıda sorgu hata verir ve rozet hiç görünmez —
   // istenen davranış bu.
+  //
+  // Ses/toast/başlık bildirimi BURADA tetiklenmez — Sidebar her sayfa geçişinde
+  // unmount/remount olduğu için (bkz. QuoteNotificationWatcher yorumu) o mantık
+  // App.tsx'te Router'ın dışında, tek sefer mount edilen ayrı bileşende yaşıyor.
   const { data: quoteStats } = useQuoteRequestStats();
   const newQuoteCount = quoteStats?.byStatus?.yeni ?? 0;
 
