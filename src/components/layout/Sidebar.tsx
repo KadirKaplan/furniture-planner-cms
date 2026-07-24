@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, Users, LogOut, SlidersHorizontal, FileText } from 'lucide-react';
+import { LayoutDashboard, Tag, Layers, Box, ShoppingBag, Users, LogOut, SlidersHorizontal, FileText, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuoteRequestStats } from '@/hooks/use-quote-requests';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ const navigation = [
   { name: 'Modül Kuralları', href: '/module-rules', icon: SlidersHorizontal },
   { name: 'Ürünler', href: '/products', icon: ShoppingBag },
   { name: 'Teklif İstekleri', href: '/quote-requests', icon: FileText },
+  { name: 'İstatistikler', href: '/analytics', icon: BarChart3 },
   { name: 'Kullanıcılar', href: '/users', icon: Users },
 ];
 
